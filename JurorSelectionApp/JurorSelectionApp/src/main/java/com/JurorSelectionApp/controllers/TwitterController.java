@@ -1,6 +1,9 @@
 package com.JurorSelectionApp.controllers;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.logging.log4j.util.Chars;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +39,7 @@ public class TwitterController {
 
     try{
       //Requesting page 1, number of elements per page is 5
-      ResponseList<Status> status = twitter.getUserTimeline(UserName, new Paging(1, 5));
+      ResponseList<Status> status = twitter.getUserTimeline(UserName, new Paging(1, 100));
       
       for(Status sts: status){
         System.out.println(sts.getText()); 
@@ -47,50 +50,62 @@ public class TwitterController {
     }
   }
 
-  //Method overload for if the user gives a specific query
-  //Outputs how many tweets match the query
-  static void TwitterAPI(String UserName, Query query){
+  //Test class for new method of finding tweets on a users page
+  static void TwitterAPI(String UserName, CharSequence query){
+    //Used for the sleep function
     final long startTime = System.nanoTime();
-      Twitter twitter = new TwitterFactory().getInstance();
+    Twitter twitter = new TwitterFactory().getInstance();
   
-      twitter.setOAuthConsumer(APIKey, APIKeySecret);
-      twitter.setOAuthAccessToken(new AccessToken(AccessToken, AccessTokenSecret));
-  
-      int numberOfTweets = 3200;
-      long lastID = Long.MAX_VALUE;
-      ArrayList<Status> qTweets = new ArrayList<Status>();
-  
-      do{
-        if (numberOfTweets - qTweets.size() > 100)
-          query.setCount(100);
-        else
-          query.setCount(numberOfTweets - qTweets.size());
-        try{
-          QueryResult result = twitter.search(query);
-          qTweets.addAll(result.getTweets());
-          System.out.println("Gathered " + qTweets.size() + " tweets");
-          for(Status sts: qTweets)
-            if(sts.getId() < lastID)
-              lastID = sts.getId();
-        }catch(TwitterException qException){
-          System.out.println("Query error: " + qException);
-        };
-        query.setMaxId(lastID -1);
-        final long duration = System.nanoTime() - startTime;
-        if((5500 - duration / 1000000) > 0){
-          System.out.println("SLEEPING FOR " + (6000 - duration / 1000000) + " miliseconds");
-          try {
-            Thread.sleep((5500 - duration / 1000000));
-          } catch (InterruptedException e) {
-            e.printStackTrace();
+    twitter.setOAuthConsumer(APIKey, APIKeySecret);
+    twitter.setOAuthAccessToken(new AccessToken(AccessToken, AccessTokenSecret));
+    
+    int pagenum = 1;
+    List FlaggedPosts = new ArrayList();
+
+    do{
+
+      try{
+        //Pulling every post from a users page
+        int size = FlaggedPosts.size();
+        Paging page = new Paging(pagenum++, 100);
+        FlaggedPosts.addAll(twitter.getUserTimeline(UserName,page));
+
+        //Filtering each post
+        ArrayList<Status> filter = new ArrayList<Status>();
+        filter.addAll(FlaggedPosts);
+
+        //Searches each status and checks if it contains the keyword, if it doesn't it removes it from Flagged Posts
+        for (Status i : filter) {
+          if(i.getText().contains(query) == false){
+            FlaggedPosts.remove(i);
           }
         }
-      } while (qTweets.size() < numberOfTweets);
+        if(FlaggedPosts.size() == size)
+          break;
+      }catch(TwitterException e){
+        System.out.println("There was an error finding posts on a users page: ");
+        e.printStackTrace();
+      }
+      //Sleep functionality to avoid gettting locked out of the twitter api
+      final long duration = System.nanoTime() - startTime;
+      if((5500 - duration / 1000000) > 0){
+        System.out.println("SLEEPING FOR " + (6000 - duration / 1000000) + " miliseconds");
+        try {
+          Thread.sleep((5500 - duration / 1000000));
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }while(true);
+
+    System.out.println("Total Flagged Posts: " + FlaggedPosts.size());
   }
+
+
 
   @RequestMapping(value = {"twitter/{UserName}","/twitter/{UserName}/{query}"})
   @ResponseBody
-  public static void getTwitterStatus(@PathVariable(required = true) String UserName, @PathVariable(required = false) Query query){
+  public static void getTwitterStatus(@PathVariable(required = true) String UserName, @PathVariable(required = false) CharSequence query){
     if(query == null) TwitterAPI(UserName);
     else if(query != null) TwitterAPI(UserName, query);
   }

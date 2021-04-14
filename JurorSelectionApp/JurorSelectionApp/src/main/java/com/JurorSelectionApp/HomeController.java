@@ -14,8 +14,8 @@ import com.restfb.types.Post;
 @Controller
 public class HomeController {
 
-	@RequestMapping("/home")
+	@RequestMapping("/")
 	public String test( ) {	
-		return "index.html";
+		return "lawyerChecker";
 	}
 }

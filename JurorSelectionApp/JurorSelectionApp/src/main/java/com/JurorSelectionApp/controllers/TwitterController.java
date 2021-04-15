@@ -32,7 +32,7 @@ public class TwitterController {
   public static String AccessTokenSecret = "r5tzVEfewhx4Ed0ZXa1LyArMF8WqSusf66Zewi8nde6Gd";
 
   //Test class for new method of finding tweets on a users page
-  static void TwitterAPI(ArrayList<String> TotalUserName, ArrayList<CharSequence> Totalquery){
+  static void TwitterAPI(String UserName, CharSequence Query){
     //Used for the sleep function
     final long startTime = System.nanoTime();
     Twitter twitter = new TwitterFactory().getInstance();
@@ -41,59 +41,95 @@ public class TwitterController {
     twitter.setOAuthAccessToken(new AccessToken(AccessToken, AccessTokenSecret));
     
     int pagenum = 1;
-    List FlaggedPosts = new ArrayList();
+    List<Status> FlaggedPosts = new ArrayList<Status>();
+    int numFlagged = 0;
+    
+    do{
+      try{
+        //Pulling every post from a users page
+        int size = FlaggedPosts.size();
+        Paging page = new Paging(pagenum++, 100);
+        FlaggedPosts.addAll(twitter.getUserTimeline(UserName,page));
 
-    //This loop will run for each username given and return the number of flagged posts under each username
-    for (String UserName : TotalUserName) {
-      //This loop will run through each keyword given once for each username
-      for(CharSequence query : Totalquery){
-        do{
-          try{
-            //Pulling every post from a users page
-            int size = FlaggedPosts.size();
-            Paging page = new Paging(pagenum++, 100);
-            FlaggedPosts.addAll(twitter.getUserTimeline(UserName,page));
-            
-            //Filtering each post
-            ArrayList<Status> filter = new ArrayList<Status>();
-            filter.addAll(FlaggedPosts);
-            
-            //Searches each status and checks if it contains the keyword, if it doesn't it removes it from Flagged Posts
-            for (Status i : filter) {
-              if(i.getText().contains(query) == false){
-                FlaggedPosts.remove(i);
-              }
-            }
-            if(FlaggedPosts.size() == size){
-              break;
-            }
-          }catch(TwitterException e){
-            System.out.println("There was an error finding posts on a users page: ");
-            e.printStackTrace();
-          }
-          //Sleep functionality to avoid gettting locked out of the twitter api
-          final long duration = System.nanoTime() - startTime;
-          if((5500 - duration / 1000000) > 0){
-            System.out.println("SLEEPING FOR " + (6000 - duration / 1000000) + " miliseconds");
-            try {
-              Thread.sleep((5500 - duration / 1000000));
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
-        }while(true);
+        //Filtering each post
+        ArrayList<Status> filter = new ArrayList<Status>();
         
-        System.out.println("Total Flagged Posts for " + UserName + " for keyword " + query +": " + FlaggedPosts.size());
+        //Searches each status and checks if it contains the keyword, if it doesn't it removes it from Flagged Posts
+        for (Status i : FlaggedPosts) {
+          if(i.getText().contains(Query) == true){
+            filter.add(i);
+            // System.out.println(i.getText()); used for debugging
+          }
+        }
+        
+        //Functionality for showing the post to the user
+        // ArrayList<String> PrintedStatus = new ArrayList();
+        // for (Status status : filter) {
+        //   if(PrintedStatus.contains(status.getText())  == false){
+        //     System.out.println(UserName + " made a post that contained " + Query + " :");
+        //     PrintedStatus.add(status.getText());
+        //     System.out.println(status.getText());
+        //     String url= "https://twitter.com/" + status.getUser().getScreenName() + "/status/" + status.getId();
+        //     System.out.println(url); 
+        //   }else{
+        //     System.out.println("this post was already shown");
+        //   }
+        // }
+        // System.out.println(PrintedStatus.toString());
+
+        if(FlaggedPosts.size() == size){
+          break;
+        }
+        numFlagged = filter.size();
+
+      }catch(TwitterException e){
+        System.out.println("There was an error finding posts on a users page: ");
+        e.printStackTrace();
       }
-    }
+      //Sleep functionality to avoid gettting locked out of the twitter api
+      final long duration = System.nanoTime() - startTime;
+      if((5500 - duration / 1000000) > 0){
+        System.out.println("SLEEPING FOR " + (6000 - duration / 1000000) + " miliseconds");
+        try {
+          Thread.sleep((5500 - duration / 1000000));
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }while(true);
+
+    
+    
+    System.out.println(" \n Total Flagged Posts for " + UserName + " for keyword " + Query +": " + numFlagged);
   }
 
 
 
-  @RequestMapping(value = {"twitter/{UserName}","/twitter/{Username}/{query}"})
+  @RequestMapping(value = {"/twitter"})
   @ResponseBody
-  public static void getTwitterStatus(@RequestParam(required = true) ArrayList<String> Username, @RequestParam(required = true) ArrayList<CharSequence> query){
-    TwitterAPI(Username, query);
+  public static void getTwitterStatus(@RequestParam(required = true) String Username, @RequestParam(required = true) String query){
+
+    String[] ArrayUsername = Username.split(",",0);
+    String[] ArrayQuery = query.split(",",0);
+
+    //Formatting the strings received to contain one space on either side of them
+    for (String str : ArrayUsername) {
+      String.format("%" + 1 + "s", str);
+      String.format("%" + (-1) + "s", str);
+      //System.out.println(str); Used for debugging
+    }
+    for (String str : ArrayQuery) {
+      String.format("%" + 1 + "s", str);
+      String.format("%" + (-1) + "s", str);
+      //System.out.println(str); Used for debugging
+    }
+
+    //This loop will run through each keyword given once for each username given
+    for (String name : ArrayUsername) {
+      for(CharSequence word : ArrayQuery){
+        TwitterAPI(name, word);
+      }
+    }
   }
 
 

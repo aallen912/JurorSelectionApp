@@ -61,7 +61,10 @@ public class LawyerChecker {
 			while(rs.next()){
 				String userName = rs.getString(1);
 				String passWord = rs.getString(2);
-				if(userName.equalsIgnoreCase(uName) && passWord.equalsIgnoreCase(pWord)){
+				String fName = rs.getString(3);
+				String lName = rs.getString(4); 
+				String location = rs.getString(5);
+				if((userName.equalsIgnoreCase(uName) && passWord.equalsIgnoreCase(pWord)) || (fName.equalsIgnoreCase(firstName) && lName.equalsIgnoreCase(lastName) && location.equalsIgnoreCase(city))){
 					userExists = true;
 				}
 			}
@@ -75,7 +78,7 @@ public class LawyerChecker {
 			
 			if (isLawyer && !userExists) {
 				model.addAttribute("displayText", firstName + " " + lastName + ", you have been verified as a Georgia lawyer and have been registered as a user.");
-				String createNewUser = "insert into user_info values ('" + uName + "', '" + pWord + "');";
+				String createNewUser = "insert into user_info values ('" + uName + "', '" + pWord + "','" + firstName + "','"+ lastName + "','" + city + "');";
 				Statement newS = cn.createStatement();
 				int nrs = newS.executeUpdate(createNewUser);
 			}
@@ -88,7 +91,7 @@ public class LawyerChecker {
 		
 		}
 
-		return "lawyerChecker.html";
+		return "lawyerChecker";
 	}
 	
 	@RequestMapping("/verify")

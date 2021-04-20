@@ -16,6 +16,6 @@ public class HomeController {
 
 	@RequestMapping("/")
 	public String test( ) {	
-		return "lawyerChecker";
+		return "homepage";
 	}
 }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>JSA</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">JSA</a> 
+      <div class="container">
+  <ul class="nav nav-tabs navbar-left" role="tablist">
+    <li class="active"><a href="/">Home</a></li>
+    <li><a href="#">Search Person of Interest</a></li>
+    <li><a href="/verify">Verification Page and Registration</a></li>
+    <li><a href="#">FAQ</a></li>
+    <li><a href="/about">About</a></li>
+  </ul>
+</div>
+    </div>
+
+    <form class="navbar-form navbar-right" action="/login">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="username: " name="username"/>
+        <input type="text" class="form-control" placeholder="password: " name="password"/>
+      </div>
+      <button type="submit" class="btn btn-default">Log-in</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Description</h1>
+  <p>Use this website to select jurors. </p>
+</div>
+<center><p th:text="${displaylogin}"></p></center>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+
+	<body>
+		<form action="#" th:action="@{/verifyLawyer}" method="GET">
+			<label>First Name:</label>
+			<input type="text" name="firstName">
+			<label>Last Name:</label>
+			<input type="text" name="lastName">
+			<label>City:</label>
+			<input type="text" name="city">
+			<button type="submit">Verify</button>
+		</form>
+		<p th:text="${displayText}"></p>
+	</body>
+</html>

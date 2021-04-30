@@ -9,7 +9,25 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
-<div th:replace= "navbar :: navbar"></div>
+
+  <div th:fragment="navbar">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">JSA</a> 
+            <div class="container">
+              <ul class="nav nav-tabs navbar-left" role="tablist">
+                <li><a href="/">Home</a></li>
+                <li><a href="/twitter">Search Person of Interest</a></li>
+                <li><a href="/verify">Verification Page and Registration</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                <li class="active"><a href="/about">About</a></li>
+              </ul>
+            </div>
+        </div>
+    </div>
+  </div>
+
 <div class="jumbotron text-center">
   <h1>About JSA</h1>
   <p>JSA is a juror selection application that allows Georgia Bar qualified lawyers 

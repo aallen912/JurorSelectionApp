@@ -71,6 +71,8 @@ public class TwitterController {
   @RequestMapping(value = "/twitterSearchAPI")
   public static String getTwitterStatus(Model model, @RequestParam(required = true) String Username, @RequestParam(required = true) String Query){
 
+    Boolean isLoggedInTwitter = loginController.isLoggedIn;
+
     ArrayList<String> Usernames = new ArrayList<String>();
     ArrayList<String> Keywords = new ArrayList<String>();
     
@@ -94,33 +96,36 @@ public class TwitterController {
     }
     
     ArrayList<QueryResult> resultsArray = new ArrayList<QueryResult>();
-    
-    //This loop will run through each keyword given once for each username given
-    for (String name : ArrayUsername) {
-      for(CharSequence word : ArrayQuery){
-        ArrayList<Object> results = TwitterAPI(name, word);
-        ArrayList<Status> temp = (ArrayList<Status>) results.get(0);
-        ArrayList<String> temp2 = (ArrayList<String>) results.get(1);
-        ArrayList<String> tweetsMadeText = new ArrayList<String>();
-        ArrayList<String> urlsForTweetsMade = new ArrayList<String>();
-        ArrayList<Status> tweetsMade = new ArrayList<Status>();
-        tweetsMade.addAll(temp);
-        urlsForTweetsMade.addAll(temp2);
-        for (Status sts : tweetsMade) {
-          tweetsMadeText.add(sts.getText());
+    if(isLoggedInTwitter){
+      //This loop will run through each keyword given once for each username given
+      for (String name : ArrayUsername) {
+        for(CharSequence word : ArrayQuery){
+          ArrayList<Object> results = TwitterAPI(name, word);
+          ArrayList<Status> temp = (ArrayList<Status>) results.get(0);
+          ArrayList<String> temp2 = (ArrayList<String>) results.get(1);
+          ArrayList<String> tweetsMadeText = new ArrayList<String>();
+          ArrayList<String> urlsForTweetsMade = new ArrayList<String>();
+          ArrayList<Status> tweetsMade = new ArrayList<Status>();
+          tweetsMade.addAll(temp);
+          urlsForTweetsMade.addAll(temp2);
+          for (Status sts : tweetsMade) {
+            tweetsMadeText.add(sts.getText());
+          }
+          QueryResult result = new QueryResult(name, word, temp.size(), tweetsMadeText, urlsForTweetsMade);
+          resultsArray.add(result);
         }
-        QueryResult result = new QueryResult(name, word, temp.size(), tweetsMadeText, urlsForTweetsMade);
-        resultsArray.add(result);
       }
+      for (String str : ArrayUsername) {
+        Usernames.add(str);
+      }
+      for (String str : ArrayQuery) {
+        Keywords.add(str);
+      }
+      model.addAttribute("QueryResults", resultsArray);
+      return "twitterSearch.html";
+    }else{
+      return "index.html";
     }
-    for (String str : ArrayUsername) {
-      Usernames.add(str);
-    }
-    for (String str : ArrayQuery) {
-      Keywords.add(str);
-    }
-    model.addAttribute("QueryResults", resultsArray);
-    return "twitterSearch.html";
   }
 
   //function for finding users pages and posts
